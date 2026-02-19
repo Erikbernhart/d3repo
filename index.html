@@ -1,23 +1,193 @@
 <!DOCTYPE html>
-<html>
-  <head>
-        <link rel="stylesheet" href="styles.css">
-    <title>My First Website</title>
-  </head>
-  <body>
-    <h1>Erik Bernhart</h1>
-    <p class= "fancy"> hier staat iets  nieuwsss </p>
-    <p>This website showcases the work i did in the d3 loves react course.</p>
-	<ol>
-	<li>film1</li>
-	<li>film2</li>
-	<li>film3</li>
-</ol>
-      <img
-      src="https://picsum.photos/300/200"
-      alt="A random placeholder image"
-      width="400"
-      height="200"
-    />
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bar Chart</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .card {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      padding: 40px 48px 36px;
+      width: 560px;
+    }
+
+    .header {
+      margin-bottom: 32px;
+    }
+
+    .title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: #f0ece0;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 6px;
+    }
+
+    .bar {
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .bar rect {
+      transition: fill 0.2s;
+    }
+
+    .bar:hover rect {
+      fill: #e8c97a !important;
+    }
+
+    .bar:hover .label-value {
+      fill: #e8c97a;
+    }
+
+    .axis text {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      fill: #555;
+    }
+
+    .axis path, .axis line {
+      stroke: #2a2a2a;
+    }
+
+    .gridline {
+      stroke: #1e1e1e;
+      stroke-dasharray: 3,3;
+    }
+
+    .label-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      fill: #888;
+      text-anchor: middle;
+    }
+
+    .label-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 14px;
+      fill: #f0ece0;
+      text-anchor: middle;
+      transition: fill 0.2s;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="title">Dataset Overview</div>
+      <div class="subtitle">Values by category · 2024</div>
+    </div>
+    <div id="chart"></div>
+  </div>
+
+  <script>
+    const data = [
+      { name: "A", value: 1 },
+      { name: "B", value: 5 },
+      { name: "C", value: 8 },
+      { name: "D", value: 10 }
+    ];
+
+    const width = 464, height = 280;
+    const margin = { top: 24, right: 16, bottom: 36, left: 40 };
+    const innerW = width - margin.left - margin.right;
+    const innerH = height - margin.top - margin.bottom;
+
+    const colors = ["#c084fc", "#818cf8", "#38bdf8", "#34d399"];
+
+    const svg = d3.select("#chart")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    const g = svg.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const x = d3.scaleBand()
+      .domain(data.map(d => d.name))
+      .range([0, innerW])
+      .padding(0.35);
+
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data, d => d.value) * 1.15])
+      .range([innerH, 0]);
+
+    // Grid lines
+    g.selectAll(".gridline")
+      .data(y.ticks(5))
+      .enter().append("line")
+      .attr("class", "gridline")
+      .attr("x1", 0).attr("x2", innerW)
+      .attr("y1", d => y(d)).attr("y2", d => y(d));
+
+    // Y axis
+    g.append("g")
+      .attr("class", "axis")
+      .call(d3.axisLeft(y).ticks(5).tickSize(0).tickPadding(10));
+
+    g.select(".axis path").remove();
+
+    // Bars
+    const bars = g.selectAll(".bar")
+      .data(data)
+      .enter().append("g")
+      .attr("class", "bar")
+      .attr("transform", d => `translate(${x(d.name)}, 0)`);
+
+    bars.append("rect")
+      .attr("x", 0)
+      .attr("y", innerH)
+      .attr("width", x.bandwidth())
+      .attr("height", 0)
+      .attr("rx", 2)
+      .attr("fill", (d, i) => colors[i])
+      .transition()
+      .duration(700)
+      .delay((d, i) => i * 100)
+      .ease(d3.easeCubicOut)
+      .attr("y", d => y(d.value))
+      .attr("height", d => innerH - y(d.value));
+
+    // Value labels above bars
+    bars.append("text")
+      .attr("class", "label-value")
+      .attr("x", x.bandwidth() / 2)
+      .attr("y", d => y(d.value) - 10)
+      .attr("opacity", 0)
+      .text(d => d.value)
+      .transition()
+      .duration(400)
+      .delay((d, i) => i * 100 + 500)
+      .attr("opacity", 1);
+
+    // Name labels below
+    bars.append("text")
+      .attr("class", "label-name")
+      .attr("x", x.bandwidth() / 2)
+      .attr("y", innerH + 22)
+      .text(d => d.name);
+  </script>
+</body>
 </html>
