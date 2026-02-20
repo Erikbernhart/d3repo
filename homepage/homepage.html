@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        background: 
+        linear-gradient(rgba(9, 0, 0, 0.85), rgba(9, 0, 0, 0.85)),
+        url('download.png') center/cover no-repeat;
+        background-size: cover;        
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: 'DM Mono', monospace;
+    }
+  
+        .title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: #d90d0d;
+      letter-spacing: -0.5px;
+      transform: rotate(-27deg);
+    }
+
+    .subtitle {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: #d90d0d;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-top: 6px;
+      transform: rotate(-27deg);
+    }
+
+    .card {
+  position: relative;
+  padding-left: 20px;
+  }
+
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -60px;           
+  height: calc(100% + 200px);  
+  width: 1.5px;
+  background: white;
+  transition: left 0.4s ease;  
+}
+.card:hover::before {
+  left: 400px;  /* adjust to move it to the right of your text */
+}
+    </style>
+</head>
+<body>
+      <div class="card">
+    <div class="header">
+      <div class="title">My area</div>
+      <div class="subtitle">a Website by Erik Bernhart</div>
+    </div>
+    <div id="chart"></div>
+  </div>
+    </body>
+</html>
